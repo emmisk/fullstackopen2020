@@ -15,3 +15,7 @@ code {
 .container {
   padding: 2rem;
 }
+
+label {
+  display: block;
+}
