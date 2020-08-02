@@ -1,16 +1,16 @@
 import React from "react"
 
 const PersonForm = ({
-  newName,
+  newPersonName,
   handleNameChange,
-  newNumber,
+  newPersonNumber,
   handleNumberChange,
-  addName,
+  addPerson,
 }) => (
-  <form onSubmit={addName}>
+  <form onSubmit={addPerson}>
     <h2>Add a new</h2>
     <label>
-      Name: <input value={newName} onChange={handleNameChange} />
+      Name: <input value={newPersonName} onChange={handleNameChange} />
     </label>
     <label>
       Number:{" "}
@@ -18,7 +18,7 @@ const PersonForm = ({
         type="tel"
         pattern="[0-9]{3} [0-9]{3} [0-9]{4}"
         placeholder="123 123 1234"
-        value={newNumber}
+        value={newPersonNumber}
         onChange={handleNumberChange}
       />
     </label>

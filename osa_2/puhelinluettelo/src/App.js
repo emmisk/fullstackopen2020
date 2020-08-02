@@ -1,65 +1,96 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import Filter from "./components/Filter"
 import PersonForm from "./components/PersonForm"
-import Numbers from "./components/Numbers"
+import Person from "./components/Person"
+import personService from "./services/persons"
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040 123456" },
-    { name: "Ada Lovelace", number: "39-44-5323523" },
-    { name: "Dan Abramov", number: "12-43-234345" },
-    { name: "Mary Poppendieck", number: "39-23-6423122" },
-  ])
-  const [newName, setNewName] = useState("")
-  const [newNumber, setNewNumber] = useState("")
-  const [findName, setFindName] = useState("")
+  const [persons, setPersons] = useState([])
+  const [newPersonName, setNewPersonName] = useState("")
+  const [newPersonNumber, setNewPersonNumber] = useState("")
+  const [findPerson, setFindPerson] = useState("")
 
-  const addName = (event) => {
+  useEffect(() => {
+    personService.getAll().then((initialPersons) => {
+      setPersons(initialPersons)
+    })
+  }, [])
+
+  const addPerson = (event) => {
     event.preventDefault()
-    const nameObject = {
-      name: newName,
-      number: newNumber,
-    }
 
-    const sameName = persons.find(({ name }) => newName === name)
-    if (sameName) {
-      window.alert(`${newName} is already added to phonebook`)
+    const samePerson = persons.find(({ name }) => newPersonName === name)
+    if (samePerson) {
+      window.confirm(
+        `${newPersonName} is already added to phonebook, replace the old number with a new one?`
+      )
+
+      const newPerson = { ...samePerson, number: newPersonNumber }
+      personService.update(newPerson).then((returnedPerson) => {
+        const newPersons = persons.map((p) =>
+          p.id === samePerson.id ? returnedPerson : p
+        )
+        setPersons(newPersons)
+        setNewPersonName("")
+        setNewPersonNumber("")
+      })
     } else {
-      setPersons(persons.concat(nameObject))
-      setNewName("")
-      setNewNumber("")
-      setFindName("")
+      personService
+        .create({
+          name: newPersonName,
+          number: newPersonNumber,
+        })
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson))
+          setNewPersonName("")
+          setNewPersonNumber("")
+        })
+    }
+  }
+
+  const removePerson = (person) => {
+    const result = window.confirm(`Delete ${person.name}?`)
+
+    if (result) {
+      personService.removePerson(person.id)
+      const filtered = persons.filter((p) => p.id !== person.id)
+      setPersons(filtered)
     }
   }
 
   const handleNameChange = (event) => {
-    setNewName(event.target.value)
+    setNewPersonName(event.target.value)
   }
 
   const handleNumberChange = (event) => {
-    setNewNumber(event.target.value)
+    setNewPersonNumber(event.target.value)
   }
 
   const handleFindChange = (event) => {
-    setFindName(event.target.value)
+    setFindPerson(event.target.value)
   }
 
   const filteredPersons = persons.filter((person) =>
-    person.name.toLowerCase().includes(findName.toLowerCase())
+    person.name.toLowerCase().includes(findPerson.toLowerCase())
   )
+
+  const personComponents = filteredPersons.map((person) => (
+    <Person key={person.id} person={person} removePerson={removePerson} />
+  ))
 
   return (
     <div className="container">
       <h1>Phonebook</h1>
-      <Filter findName={findName} handleFindChange={handleFindChange} />
+      <Filter findPerson={findPerson} handleFindChange={handleFindChange} />
       <PersonForm
-        newName={newName}
+        newPersonName={newPersonName}
         handleNameChange={handleNameChange}
-        newNumber={newNumber}
+        newPersonNumber={newPersonNumber}
         handleNumberChange={handleNumberChange}
-        addName={addName}
+        addPerson={addPerson}
       />
-      <Numbers filteredPersons={filteredPersons} />
+      <h2>Numbers</h2>
+      {personComponents}
     </div>
   )
 }

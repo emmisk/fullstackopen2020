@@ -1,8 +1,8 @@
 import React from "react"
 
-const Filter = ({ findName, handleFindChange }) => (
+const Filter = ({ findPerson, handleFindChange }) => (
   <label>
-    Filter shown with: <input value={findName} onChange={handleFindChange} />
+    Filter shown with: <input value={findPerson} onChange={handleFindChange} />
   </label>
 )
 
